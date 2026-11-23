@@ -1,0 +1,3 @@
+/config.local.php
+/public/uploads/*
+!/public/uploads/.gitkeep
