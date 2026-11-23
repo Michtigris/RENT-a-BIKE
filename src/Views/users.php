@@ -16,7 +16,15 @@
                     <td><?= htmlspecialchars($user['firstname'] . ' ' . $user['lastname']) ?></td>
                     <td><?= htmlspecialchars($user['login']) ?></td>
                     <td><?= htmlspecialchars($user['role']) ?></td>
-                    <td><?php if ($user['user_id'] !== $_SESSION['user']['user_id']): ?><button class="button-small danger" data-delete-user="<?= $user['user_id'] ?>">Supprimer</button><?php endif; ?></td>
+                    <td>
+                        <?php if ($_SESSION['user']['role'] === 'admin' && (int) $user['user_id'] !== (int) $_SESSION['user']['user_id']): ?>
+                            <form method="post" action="<?= BASE_URL ?>/dashboard/user/delete" data-confirm="Supprimer ce compte ?">
+                                <?= csrfField() ?>
+                                <input type="hidden" name="id" value="<?= $user['user_id'] ?>">
+                                <button class="button-small danger" type="submit">Supprimer</button>
+                            </form>
+                        <?php endif; ?>
+                    </td>
                 </tr>
             <?php endforeach; ?>
             </tbody></table>

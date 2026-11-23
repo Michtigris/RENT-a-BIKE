@@ -1,12 +1,12 @@
 <?php
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/../config/config.php';
 
 try {
     $pdo = new PDO('mysql:host=' . DB_HOST . ';charset=utf8mb4', DB_USER, DB_PASS, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     ]);
-    $pdo->exec(file_get_contents(__DIR__ . '/script.sql'));
+    $pdo->exec(file_get_contents(__DIR__ . '/../database/script.sql'));
     $pdo->exec('USE bike_rental');
 
     $check = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role = 'admin'");
@@ -36,15 +36,15 @@ try {
         $stmt->execute(['VELO-003', 1, null]);
     }
 
-    echo 'Installation terminée.<br>';
+    echo "Installation terminée." . PHP_EOL;
     if ($adminLogin !== null) {
-        echo 'Identifiant administrateur : <strong>' . htmlspecialchars((string) $adminLogin) . '</strong><br>';
-        echo 'Mot de passe administrateur : <strong>' . htmlspecialchars($adminPassword) . '</strong><br>';
-        echo 'Enregistrez ces identifiants maintenant : ils ne seront plus affichés.';
+        echo 'Identifiant administrateur : ' . $adminLogin . PHP_EOL;
+        echo 'Mot de passe administrateur : ' . $adminPassword . PHP_EOL;
+        echo 'Enregistrez ces identifiants maintenant : ils ne seront plus affichés.' . PHP_EOL;
     } else {
-        echo 'Un compte administrateur existe déjà ; aucun nouvel identifiant n’a été généré.';
+        echo 'Un compte administrateur existe déjà ; aucun nouvel identifiant n’a été généré.' . PHP_EOL;
     }
 } catch (Throwable $e) {
-    http_response_code(500);
-    echo 'Erreur d\'installation : ' . htmlspecialchars($e->getMessage());
+    fwrite(STDERR, 'Erreur d’installation : ' . $e->getMessage() . PHP_EOL);
+    exit(1);
 }

@@ -2,7 +2,12 @@
 
 class Bike
 {
-    public function __construct(private PDO $db) {}
+    private PDO $db;
+
+    public function __construct()
+    {
+        $this->db = Database::getInstance()->getConnection();
+    }
 
     public function all(bool $availableOnly = false): array
     {
@@ -21,14 +26,14 @@ class Bike
         return $stmt->fetch() ?: null;
     }
 
-    public function create(array $data, ?string $photo = null): bool
+    public function create(string $registration, bool $available, ?string $photo): bool
     {
         $stmt = $this->db->prepare(
             'INSERT INTO bikes (registration_number, availability, photo) VALUES (?, ?, ?)'
         );
         return $stmt->execute([
-            trim($data['registration_number']),
-            isset($data['availability']) ? 1 : 0,
+            $registration,
+            $available ? 1 : 0,
             $photo,
         ]);
     }

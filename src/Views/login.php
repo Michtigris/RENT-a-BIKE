@@ -1,6 +1,7 @@
 <?php /** @var ?string $error */ ?>
 <section class="form-page narrow">
     <form class="form-card simple-form" method="post" action="<?= BASE_URL ?>/login">
+        <?= csrfField() ?>
         <p class="eyebrow">Administration</p>
         <h1>Connexion employé</h1>
         <?php if ($error): ?>

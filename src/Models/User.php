@@ -2,7 +2,12 @@
 
 class User
 {
-    public function __construct(private PDO $db) {}
+    private PDO $db;
+
+    public function __construct()
+    {
+        $this->db = Database::getInstance()->getConnection();
+    }
 
     public function all(): array
     {
@@ -15,6 +20,13 @@ class User
         $stmt = $this->db->prepare('SELECT * FROM users WHERE login = ?');
         $stmt->execute([$login]);
         return $stmt->fetch() ?: null;
+    }
+
+    public function role(int $id): ?string
+    {
+        $stmt = $this->db->prepare('SELECT role FROM users WHERE user_id = ?');
+        $stmt->execute([$id]);
+        return $stmt->fetchColumn() ?: null;
     }
 
     public function create(array $data): bool

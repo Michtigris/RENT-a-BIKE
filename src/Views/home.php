@@ -23,14 +23,13 @@
         <?php foreach ($bikes as $bike): ?>
             <article class="bike-card">
                 <?php if (!empty($bike['photo'])): ?>
-                    <img src="<?= BASE_URL ?>/public/<?= htmlspecialchars($bike['photo']) ?>" alt="Vélo <?= htmlspecialchars($bike['registration_number']) ?>">
+                    <img src="<?= PUBLIC_URL ?>/<?= htmlspecialchars($bike['photo']) ?>" alt="Vélo <?= htmlspecialchars($bike['registration_number']) ?>">
                 <?php else: ?>
                     <div class="bike-placeholder" aria-hidden="true">🚲</div>
                 <?php endif; ?>
                 <div class="bike-card-body">
                     <span class="status available">Disponible</span>
                     <h3><?= htmlspecialchars($bike['registration_number']) ?></h3>
-                    <p>Vélo communal · Électrique ou classique</p>
                     <a class="button" href="<?= BASE_URL ?>/reserve?bike=<?= $bike['bike_id'] ?>">Réserver</a>
                 </div>
             </article>

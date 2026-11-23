@@ -9,13 +9,14 @@ class AuthController extends Controller
 
     public function authenticate(): void
     {
-        $login = (int) ($_POST['login'] ?? 0);
-        $password = $_POST['password'] ?? '';
-        $user = (new User(Database::getInstance()->getConnection()))->findByLogin($login);
+        $login = (int) filter_input(INPUT_POST, 'login', FILTER_VALIDATE_INT);
+        $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
+        $user = (new User())->findByLogin($login);
         if (!$user || $user['role'] === 'citizen' || !password_verify($password, $user['password'])) {
             $this->view('login', ['title' => 'Connexion employé', 'error' => 'Identifiant ou mot de passe incorrect.']);
             return;
         }
+        session_regenerate_id(true);
         $_SESSION['user'] = [
             'user_id' => $user['user_id'],
             'firstname' => $user['firstname'],
