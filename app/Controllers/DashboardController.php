@@ -2,20 +2,24 @@
 
 class DashboardController extends Controller
 {
-    private PDO $db;
+    private Bike $bikeModel;
+    private Reservation $reservationModel;
+    private User $userModel;
 
     public function __construct()
     {
-        $this->db = Database::getInstance()->getConnection();
+        $db = Database::getInstance()->getConnection();
+        $this->bikeModel = new Bike($db);
+        $this->reservationModel = new Reservation($db);
+        $this->userModel = new User($db);
     }
 
     public function index(): void
     {
         $this->requireEmployee();
-        $reservationModel = new Reservation($this->db);
         $this->view('dashboard', [
             'title' => 'Tableau de bord',
-            'reservations' => $reservationModel->all('pending'),
+            'reservations' => $this->reservationModel->all('pending'),
         ]);
     }
 
@@ -24,16 +28,16 @@ class DashboardController extends Controller
         $this->requireEmployee();
         $this->view('bikes', [
             'title' => 'Gestion des vélos',
-            'bikes' => (new Bike($this->db))->all(),
+            'bikes' => $this->bikeModel->all(),
         ]);
     }
 
     public function users(): void
     {
-        $this->requireAdmin();
+        $this->requireEmployee();
         $this->view('users', [
             'title' => 'Gestion des utilisateurs',
-            'users' => (new User($this->db))->all(),
+            'users' => $this->userModel->all(),
         ]);
     }
 
@@ -42,7 +46,7 @@ class DashboardController extends Controller
         $this->requireEmployee();
         $this->view('reservations', [
             'title' => 'Toutes les réservations',
-            'reservations' => (new Reservation($this->db))->all(),
+            'reservations' => $this->reservationModel->all(),
         ]);
     }
 
@@ -61,21 +65,21 @@ class DashboardController extends Controller
                 move_uploaded_file($_FILES['photo']['tmp_name'], dirname(__DIR__, 2) . '/public/' . $photo);
             }
         }
-        (new Bike($this->db))->create($_POST, $photo);
+        $this->bikeModel->create($_POST, $photo);
         $this->redirect('/dashboard/bikes');
     }
 
     public function deleteBike(string $id): void
     {
         $this->requireAdmin();
-        (new Bike($this->db))->delete((int) $id);
+        $this->bikeModel->delete((int) $id);
         $this->redirect('/dashboard/bikes');
     }
 
     public function deleteUser(string $id): void
     {
         $this->requireAdmin();
-        (new User($this->db))->delete((int) $id);
+        $this->userModel->delete((int) $id);
         $this->redirect('/dashboard/users');
     }
 
@@ -84,14 +88,21 @@ class DashboardController extends Controller
         $this->requireEmployee();
         $id = (int) ($_POST['reservation_id'] ?? 0);
         $status = $_POST['status'] ?? '';
-        (new Reservation($this->db))->updateStatus($id, $status);
+        if (!in_array($status, ['accepted', 'rejected'], true)) {
+            $this->json(['success' => false], 422);
+        }
+        if (!$this->reservationModel->updateStatus($id, $status)) {
+            $this->json(['success' => false], 404);
+        }
         $this->json(['success' => true]);
     }
 
     public function deleteReservation(string $id): void
     {
         $this->requireAdmin();
-        (new Reservation($this->db))->delete((int) $id);
+        if (!$this->reservationModel->delete((int) $id)) {
+            $this->json(['success' => false], 404);
+        }
         $this->json(['success' => true]);
     }
 
@@ -99,10 +110,9 @@ class DashboardController extends Controller
     {
         $this->requireEmployee();
         $term = trim($_GET['q'] ?? '');
-        $this->json([
-            'reservations' => $term === ''
-                ? (new Reservation($this->db))->all()
-                : (new Reservation($this->db))->search($term),
-        ]);
+        $reservations = $term === ''
+            ? $this->reservationModel->all()
+            : $this->reservationModel->search($term);
+        $this->json(['reservations' => $reservations]);
     }
 }

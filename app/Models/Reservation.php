@@ -69,12 +69,12 @@ class Reservation
             return false;
         }
         $stmt = $this->db->prepare('UPDATE reservations SET status = ? WHERE reservation_id = ?');
-        return $stmt->execute([$status, $id]);
+        return $stmt->execute([$status, $id]) && $stmt->rowCount() > 0;
     }
 
     public function delete(int $id): bool
     {
         $stmt = $this->db->prepare('DELETE FROM reservations WHERE reservation_id = ?');
-        return $stmt->execute([$id]);
+        return $stmt->execute([$id]) && $stmt->rowCount() > 0;
     }
 }

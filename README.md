@@ -28,6 +28,14 @@ php -S 127.0.0.1:8000 -t .
 
 Puis ouvrez `http://127.0.0.1:8000/`.
 
+## Styles Sass
+
+Le navigateur utilise `public/assets/style.css`, généré depuis `public/assets/style.scss` :
+
+```sh
+npx sass public/assets/style.scss public/assets/style.css --no-source-map
+```
+
 ## Fonctionnalités
 
 - Catalogue public et demandes de réservation avec vérification des chevauchements de dates
